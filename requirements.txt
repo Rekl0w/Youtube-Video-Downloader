@@ -1,0 +1,4 @@
+pytube>=10.0.0
+tk
+sv_ttk
+pathlib
