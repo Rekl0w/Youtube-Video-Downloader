@@ -1,6 +1,6 @@
 from pytube import YouTube
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import sv_ttk
 from pathlib import Path
 
@@ -47,38 +47,44 @@ window.resizable(False, False)
 
 def download_video():
     # Get the YouTube video URL from the entry field
-    video_url = entry.get()
+    try:
+        video_url = entry.get()
 
-    if video_url == "":
-        tk.messagebox.showerror(title="Error", message="Please enter a YouTube video URL.")
-        return
-    elif "youtube.com" not in video_url:
-        tk.messagebox.showerror(title="Error", message="Please enter a valid YouTube video URL.")
-        return
-    elif "watch?v=" not in video_url:
-        tk.messagebox.showerror(title="Error", message="Please enter a valid YouTube video URL.")
-        return
+        if video_url == "":
+            messagebox.showerror(title="Error", message="Please enter a YouTube video URL.")
+            return
+        elif "youtube.com" not in video_url:
+            messagebox.showerror(title="Error", message="Please enter a valid YouTube video URL.")
+            return
+        elif "watch?v=" not in video_url:
+            messagebox.showerror(title="Error", message="Please enter a valid YouTube video URL.")
+            return
+        elif r"(?:(?:https?:)?\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})":
+            messagebox.showerror(title="Error", message="Please enter a valid YouTube video URL.")
+            return
+        # Create a YouTube object
+        yt = YouTube(video_url)
 
-    # Create a YouTube object
-    yt = YouTube(video_url)
+        # Get the highest resolution video stream
+        stream = yt.streams.get_highest_resolution()
 
-    # Get the highest resolution video stream
-    stream = yt.streams.get_highest_resolution()
+        # Get the user's Downloads folder path
+        downloads_folder = str(Path.home() / "Downloads")
 
-    # Get the user's Downloads folder path
-    downloads_folder = str(Path.home() / "Downloads")
+        # Set the download location to the user's Downloads folder
+        save_path = downloads_folder
 
-    # Set the download location to the user's Downloads folder
-    save_path = downloads_folder
-
-    # Download the video to the selected location
-    try: 
-        stream.download(output_path=save_path)
-        # Display a message box to indicate that the download is complete
-        tk.messagebox.showinfo(title="Download Complete", message="The download is complete. The video can be found in your Downloads folder.")
-    except:
+        # Download the video to the selected location
+        try: 
+            stream.download(output_path=save_path)
+            # Display a message box to indicate that the download is complete
+            messagebox.showinfo(title="Download Complete", message="The download is complete. The video can be found in your Downloads folder.")
+        except:
+            # Display a message box to indicate that an error occurred
+            messagebox.showerror(title="Error", message="An error occurred while downloading the video.")
+    except Exception as e:
         # Display a message box to indicate that an error occurred
-        tk.messagebox.showerror(title="Error", message="An error occurred while downloading the video.")
+        messagebox.showerror(title="Error", message=f"An error occurred while downloading the video: {str(e)}")
 
     # Clear the entry field
     entry.delete(0, tk.END)
